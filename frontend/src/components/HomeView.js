@@ -14,7 +14,7 @@ export default class HomeView extends Component {
       <div>
         <Header content="SVN Admin"/>
         <p>
-          Lorem ipsum dolores
+          Here you can register as svn user and create new repositories.
         </p>
       </div>
     )

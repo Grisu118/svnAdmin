@@ -7,6 +7,7 @@ import {Segment} from "semantic-ui-react";
 import RegisterUserView from "./components/RegisterUserView";
 import FooterComponent from "./components/FooterComponent";
 import LoginView from "./components/LoginView";
+import RepoManagerView from "./components/RepoManagerView";
 
 export default class App extends Component {
 
@@ -42,6 +43,9 @@ export default class App extends Component {
       case "login":
         view = <LoginView loginFunc={this._doLogin}/>;
         break;
+      case "repoManager":
+        view = <RepoManagerView/>;
+        break;
       default:
         view = <HomeView/>;
     }
@@ -62,6 +66,7 @@ export default class App extends Component {
   };
 
   _doLogout = () => {
+    axios.post("api/logout");
     this.setState({loggedIn: null})
   };
 }

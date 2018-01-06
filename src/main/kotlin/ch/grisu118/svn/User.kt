@@ -14,6 +14,7 @@ import io.ktor.sessions.get
 import io.ktor.sessions.sessions
 import io.ktor.sessions.set
 import java.io.File
+import java.util.*
 
 private val passwdFile = File("/etc/subversion/passwd")
 
@@ -57,7 +58,9 @@ internal suspend fun PipelineContext<Unit, ApplicationCall>.doLogin() {
     return
   }
   if (BCrypt.checkpw(pass, hash)) {
-    call.sessions.set(SvnAdminSession(userId = userName))
+    val uuid = UUID.randomUUID()
+    call.sessions.set(SvnAdminSession(userId = userName, uuid = uuid))
+    Application.sessionIds[userName] = uuid
     call.respond(LoginResponse(userName))
   } else {
     call.respondText("Invalid Password", status = HttpStatusCode.Unauthorized)
@@ -66,19 +69,20 @@ internal suspend fun PipelineContext<Unit, ApplicationCall>.doLogin() {
 }
 
 internal suspend fun PipelineContext<Unit, ApplicationCall>.handleGetLogin() {
-  val user = call.sessions.get<SvnAdminSession>()
-  if (user == null) {
+  val session = call.sessions.get<SvnAdminSession>()
+  if (!Application.validSession(session)) {
     call.respond(HttpStatusCode.Forbidden)
   } else {
-    call.respond(LoginResponse(user.userId))
+    call.respond(LoginResponse(session!!.userId))
   }
 }
 
 internal suspend fun PipelineContext<Unit, ApplicationCall>.doLogout() {
-  val user = call.sessions.get<SvnAdminSession>()
-  if (user == null) {
+  val session = call.sessions.get<SvnAdminSession>()
+  if (!Application.validSession(session)) {
     call.respond(HttpStatusCode.Forbidden)
   } else {
+    Application.sessionIds.remove(session?.userId)
     call.sessions.clear<SvnAdminSession>()
     call.respond(HttpStatusCode.OK)
   }

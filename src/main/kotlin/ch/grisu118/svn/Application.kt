@@ -20,9 +20,15 @@ import io.ktor.server.netty.Netty
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 object Application {
   internal lateinit var token: String
+  internal val sessionIds = ConcurrentHashMap<String, UUID>()
+
+  internal fun validSession(session: SvnAdminSession?): Boolean {
+    return session != null && sessionIds[session.userId] == session.uuid
+  }
 
   @JvmStatic
   fun main(args: Array<String>) {
@@ -61,6 +67,9 @@ object Application {
         }
         post("/api/logout") {
           doLogout()
+        }
+        post("/api/repo") {
+          doCreate()
         }
       }
     }

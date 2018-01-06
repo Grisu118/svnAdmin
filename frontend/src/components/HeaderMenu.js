@@ -19,8 +19,11 @@ export default class HeaderMenu extends Component {
 
     let loginLogout;
     let registerUser;
+    let repoManager;
     if (this.props.userId) {
       loginLogout = <Menu.Item name="logout" position="right" onClick={this.props.logoutFunc}/>;
+      repoManager =
+        <Menu.Item name="repoManager" active={activeView === 'repoManager'} onClick={this._handleItemClick}/>;
     } else {
       loginLogout =
         <Menu.Item name="login" position="right" active={activeView === 'login'} onClick={this._handleItemClick}/>;
@@ -32,6 +35,7 @@ export default class HeaderMenu extends Component {
         <Menu pointing secondary>
           <Menu.Item header>SVN Admin</Menu.Item>
           <Menu.Item name='home' active={activeView === 'home'} onClick={this._handleItemClick}/>
+          {repoManager}
           {registerUser}
           {loginLogout}
         </Menu>
