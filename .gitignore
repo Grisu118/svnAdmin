@@ -26,3 +26,5 @@ hs_err_pid*
 /.idea/
 *.iml
 !gradle/wrapper/gradle-wrapper.jar
+
+src/main/resources/react/

@@ -1,7 +1,10 @@
 package ch.grisu118.svn
 
+import ch.grisu118.kotlin.process.execute
 import io.ktor.application.call
 import io.ktor.content.defaultResource
+import io.ktor.content.resource
+import io.ktor.content.resources
 import io.ktor.content.static
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
@@ -25,7 +28,8 @@ object Application {
     val server = embeddedServer(Netty, 8080) {
       routing {
         static {
-          defaultResource("index.html")
+          resources("react")
+          defaultResource("react/index.html")
         }
         post("/api/user") {
           val map = call.receive<ValuesMap>()
@@ -60,6 +64,6 @@ object Application {
   private fun userExists(s: String): Boolean = passwdFile.readLines().map { it.split(":")[0] }.any { it == s }
 
   private fun createUser(name: String, pass: String) {
-    Runtime.getRuntime().exec("htpasswd -b /etc/subversion/passwd $name $pass")
+    "htpasswd -b /etc/subversion/passwd $name $pass".execute()
   }
 }
