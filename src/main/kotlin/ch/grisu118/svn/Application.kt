@@ -1,69 +1,70 @@
 package ch.grisu118.svn
 
-import ch.grisu118.kotlin.process.execute
-import io.ktor.application.call
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.ktor.application.install
 import io.ktor.content.defaultResource
-import io.ktor.content.resource
 import io.ktor.content.resources
 import io.ktor.content.static
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.receive
-import io.ktor.response.respondText
+import io.ktor.features.CallLogging
+import io.ktor.features.Compression
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
+import io.ktor.jackson.jackson
+import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.ValuesMap
-import java.io.File
+import io.ktor.sessions.Sessions
+import io.ktor.sessions.cookie
 import java.util.*
 
 object Application {
-  private val passwdFile = File("/etc/subversion/passwd")
-  private lateinit var token: String
+  internal lateinit var token: String
 
   @JvmStatic
   fun main(args: Array<String>) {
     token = UUID.randomUUID().toString()
     println("Token: $token")
+
     val server = embeddedServer(Netty, 8080) {
+      install(DefaultHeaders)
+      install(Compression)
+      install(CallLogging)
+      install(ContentNegotiation) {
+        jackson {
+          configure(SerializationFeature.INDENT_OUTPUT, true)
+          registerModule(JavaTimeModule())
+          registerKotlinModule()
+        }
+      }
+      install(Sessions) {
+        cookie<SvnAdminSession>("SvnAdminSession")
+      }
+
       routing {
         static {
+          resources("static")
           resources("react")
           defaultResource("react/index.html")
         }
         post("/api/user") {
-          val map = call.receive<ValuesMap>()
-          if (map["pass"] != map["pass2"]) {
-            call.respondText("Passwords do not match!", status = HttpStatusCode.BadRequest)
-            return@post
-          }
-          if (map["pass"] == null || map["pass"]!!.length < 8) {
-            call.respondText("Passwords to short", status = HttpStatusCode.BadRequest)
-            return@post
-          }
-          if (map["pass"].isNullOrBlank() || map["username"].isNullOrBlank() || map["token"].isNullOrBlank()) {
-            call.respondText("values could not be empty!", status = HttpStatusCode.BadRequest)
-            return@post
-          }
-          if (token != map["token"]) {
-            call.respondText("invalid token", status = HttpStatusCode.Forbidden)
-            return@post
-          }
-          if (userExists(map["username"]!!)) {
-            call.respondText("user already exists", status = HttpStatusCode.BadRequest)
-            return@post
-          }
-          createUser(map["username"]!!, map["pass"]!!)
-          call.respondText("Created User")
+          handleRegister()
+        }
+        get("/api/login") {
+          handleGetLogin()
+        }
+        post("/api/login") {
+          doLogin()
+        }
+        post("/api/logout") {
+          doLogout()
         }
       }
     }
     server.start(wait = true)
   }
 
-  private fun userExists(s: String): Boolean = passwdFile.readLines().map { it.split(":")[0] }.any { it == s }
-
-  private fun createUser(name: String, pass: String) {
-    "htpasswd -b /etc/subversion/passwd $name $pass".execute()
-  }
 }

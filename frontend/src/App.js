@@ -1,21 +1,67 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
+import axios from 'axios';
+import HeaderMenu from "./components/HeaderMenu";
+import HomeView from "./components/HomeView";
+import {Segment} from "semantic-ui-react";
+import RegisterUserView from "./components/RegisterUserView";
+import FooterComponent from "./components/FooterComponent";
+import LoginView from "./components/LoginView";
 
-class App extends Component {
+export default class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeView: "home",
+      loggedIn: null
+    }
+  }
+
+  componentWillMount() {
+    axios.get("api/login").then(
+      res => {
+        if (res.status === 200) {
+          this.setState({loggedIn: res.data.userId})
+        } else {
+          this.setState({loggedIn: null})
+        }
+      },
+      err => {
+        this.setState({loggedIn: null})
+      }
+    )
+  }
+
   render() {
+    let view;
+    switch (this.state.activeView) {
+      case "register":
+        view = <RegisterUserView/>;
+        break;
+      case "login":
+        view = <LoginView loginFunc={this._doLogin}/>;
+        break;
+      default:
+        view = <HomeView/>;
+    }
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <HeaderMenu userId={this.state.loggedIn} activeView={this.state.activeView}
+                    changeView={v => this.setState({activeView: v})} logoutFunc={this._doLogout}/>
+        <Segment className="container" raised padded="very">
+          {view}
+        </Segment>
+        <FooterComponent/>
       </div>
     );
   }
-}
 
-export default App;
+  _doLogin = name => {
+    this.setState({loggedIn: name});
+  };
+
+  _doLogout = () => {
+    this.setState({loggedIn: null})
+  };
+}

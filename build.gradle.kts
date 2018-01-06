@@ -17,11 +17,14 @@ repositories {
 
 dependencies {
   compile(kotlin("stdlib-jdk8", version = "1.2.10"))
+  compile(kotlin("stdlib-jre8", version = "1.2.10"))
   compile(kotlin("reflect", version = "1.2.10"))
 
-  compile("ch.grisu118:kotlin-wrapper:0.3.0")
+  compile("ch.grisu118:kotlin-wrapper:0.4.0")
 
   compile("io.ktor:ktor-server-netty:0.9.0")
+  compile("io.ktor:ktor-jackson:0.9.0")
+  compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.2")
   compile("ch.qos.logback:logback-classic:1.2.3")
 }
 
