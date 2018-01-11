@@ -52,7 +52,7 @@ export default class RegisterUserView extends Component {
   }
 
   _handleSubmit = () => {
-    axios.post("api/user", this.state.user).then(
+    axios.post("api/register", this.state.user).then(
       res => {
         console.log(res);
         this.setState({success: true, error: false})

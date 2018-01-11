@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "ch.grisu118"
-version = "0.1.0"
+version = "0.1.1"
 
 plugins {
   kotlin("jvm") version "1.2.10"
@@ -15,6 +15,8 @@ repositories {
   maven { setUrl("https://dl.bintray.com/grisu118/kotlin") }
 }
 
+val ktorVersion = "0.9.1-alpha-8"
+
 dependencies {
   compile(kotlin("stdlib-jdk8", version = "1.2.10"))
   compile(kotlin("stdlib-jre8", version = "1.2.10"))
@@ -22,8 +24,9 @@ dependencies {
 
   compile("ch.grisu118:kotlin-wrapper:0.4.0")
 
-  compile("io.ktor:ktor-server-netty:0.9.0")
-  compile("io.ktor:ktor-jackson:0.9.0")
+  compile("io.ktor:ktor-server-netty:$ktorVersion")
+  compile("io.ktor:ktor-jackson:$ktorVersion")
+  compile("io.ktor:ktor-locations:$ktorVersion")
   compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.2")
   compile("ch.qos.logback:logback-classic:1.2.3")
 }
@@ -38,7 +41,7 @@ val fatJar = task("fatJar", type = Jar::class) {
   manifest {
     attributes["Implementation-Title"] = "SvnAdmin"
     attributes["Implementation-Version"] = version
-    attributes["Main-Class"] = "ch.grisu118.svn.Application"
+    attributes["Main-Class"] = "io.ktor.server.netty.DevelopmentEngine"
   }
   from(configurations.runtime.map({ if (it.isDirectory) it else zipTree(it) }))
   with(tasks["jar"] as CopySpec)
@@ -57,6 +60,9 @@ val buildFrontend = task("buildFrontend", type = Exec::class) {
 }
 
 val copyFrontend = task("copyFrontend", type = Copy::class) {
+  doFirst {
+    File("src/main/resources/react").deleteRecursively()
+  }
   group = "build"
   from("frontend/build")
   into("src/main/resources/react")

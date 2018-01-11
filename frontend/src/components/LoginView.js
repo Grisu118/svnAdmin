@@ -49,18 +49,18 @@ export default class LoginView extends Component {
   }
 
   _handleSubmit = () => {
-    axios.post("api/login", this.state.user).then(
+    let data = new FormData();
+    data.append("userName", this.state.user.username);
+    data.append("password", this.state.user.pass);
+    axios.post("api/login", data).then(
       res => {
-        console.log(res);
         this.setState({success: true, error: false});
         this.props.loginFunc(res.data.userId)
       },
       err => {
         if (err.response) {
-          if (err.response.status === 400) {
-            this.setState({failureMsg: err.response.data, error: true, success: false})
-          } else if (err.response.status === 401) {
-            this.setState({failureMsg: err.response.data, error: true, success: false})
+          if (err.response.status === 404) {
+            this.setState({failureMsg: "Invalid Login", error: true, success: false})
           } else {
             this.setState({failureMsg: "Unknown failure", error: true, success: false});
             console.log(err)
