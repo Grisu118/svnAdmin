@@ -28,3 +28,6 @@ hs_err_pid*
 !gradle/wrapper/gradle-wrapper.jar
 
 src/main/resources/react/
+
+passwd
+application.conf
