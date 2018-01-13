@@ -1,14 +1,31 @@
-import React, {Component} from "react";
+import * as React from 'react';
 import {Button, Form, Header, Message} from "semantic-ui-react";
-import PropTypes from 'prop-types';
-import axios from 'axios';
+import Axios from 'axios';
 
-export default class LoginView extends Component {
-  static propTypes = {
-    loginFunc: PropTypes.func.isRequired
-  };
+interface LoginProps {
+  loginFunc: (name: string | null) => void;
+}
 
-  constructor(props) {
+interface User {
+  username: string;
+  pass: string;
+}
+
+interface LoginState {
+  user: User;
+  error: boolean;
+  success: boolean;
+  failureMsg: string;
+}
+
+interface Input {
+  name: string,
+  value: string
+}
+
+export default class LoginView extends React.Component<LoginProps, LoginState> {
+
+  constructor(props: LoginProps) {
     super(props);
     this.state = {
       user: {
@@ -18,7 +35,7 @@ export default class LoginView extends Component {
       error: false,
       success: false,
       failureMsg: ""
-    }
+    };
   }
 
   render() {
@@ -52,7 +69,7 @@ export default class LoginView extends Component {
     let data = new FormData();
     data.append("userName", this.state.user.username);
     data.append("password", this.state.user.pass);
-    axios.post("api/login", data).then(
+    Axios.post("api/login", data).then(
       res => {
         this.setState({success: true, error: false});
         this.props.loginFunc(res.data.userId)
@@ -73,9 +90,9 @@ export default class LoginView extends Component {
     )
   };
 
-  _handleChange = (e, {name, value}) => {
+  _handleChange = (e: any, input: Input) => {
     let user = this.state.user;
-    user[name] = value;
+    user[input.name] = input.value;
     this.setState({user: user});
   }
 

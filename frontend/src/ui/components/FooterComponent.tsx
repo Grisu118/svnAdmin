@@ -1,11 +1,15 @@
-import React, {Component} from "react";
+import * as React from 'react';
+import Axios from 'axios';
 import {Container} from 'semantic-ui-react'
-import axios from 'axios';
 
-export default class FooterComponent extends Component {
-  static propTypes = {};
+interface FooterState {
+  version: string;
+}
 
-  constructor(props) {
+export default class FooterComponent extends React.Component<any, FooterState> {
+  private year: number;
+
+  constructor(props: any) {
     super(props);
     this.state = {
       version: ""
@@ -14,9 +18,9 @@ export default class FooterComponent extends Component {
   }
 
   componentWillMount() {
-    axios.get("version.json").then(res => {
+    Axios.get("version.json").then(res => {
       this.setState({version: res.data.version});
-    })
+    });
   }
 
   render() {
@@ -28,7 +32,7 @@ export default class FooterComponent extends Component {
           Version {this.state.version}
         </p>
       </Container>
-    )
+    );
   }
 
 }

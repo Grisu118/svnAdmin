@@ -1,15 +1,9 @@
-import React, {Component} from "react";
+import * as React from 'react';
 import {Header} from "semantic-ui-react";
 
-export default class HomeView extends Component {
-  static propTypes = {};
-
-  constructor(props) {
-    super(props)
-  }
+export default class HomeView extends React.Component {
 
   render() {
-
     return (
       <div>
         <Header content="SVN Admin"/>

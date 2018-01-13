@@ -1,11 +1,24 @@
-import React, {Component} from "react";
-import {Button, Form, Header, Message} from "semantic-ui-react";
-import axios from 'axios';
+import * as React from "react";
+import {Button, Form, Header, InputOnChangeData, Message} from "semantic-ui-react";
+import Axios from 'axios';
 
-export default class RegisterUserView extends Component {
-  static propTypes = {};
+interface User {
+  token: string;
+  username: string;
+  pass: string;
+  pass2: string
+}
 
-  constructor(props) {
+interface RegisterState {
+  user: User;
+  error: boolean;
+  success: boolean;
+  failureMsg: string;
+}
+
+export default class RegisterUserView extends React.Component<any, RegisterState> {
+
+  constructor(props: any) {
     super(props);
     this.state = {
       user: {
@@ -52,7 +65,7 @@ export default class RegisterUserView extends Component {
   }
 
   _handleSubmit = () => {
-    axios.post("api/register", this.state.user).then(
+    Axios.post("api/register", this.state.user).then(
       res => {
         console.log(res);
         this.setState({success: true, error: false})
@@ -75,9 +88,9 @@ export default class RegisterUserView extends Component {
     )
   };
 
-  _handleChange = (e, {name, value}) => {
+  _handleChange = (event: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => {
     let user = this.state.user;
-    user[name] = value;
+    user[data.name] = data.value;
     this.setState({user: user});
   }
 

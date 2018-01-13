@@ -1,34 +1,38 @@
-import React, {Component} from "react";
-import {Header, Input, Message} from "semantic-ui-react";
-import axios from 'axios';
+import * as React from "react";
+import {Header, Input, InputOnChangeData, Message} from "semantic-ui-react";
+import Axios from 'axios';
 
+interface RepoState {
+  repoName: string;
+  success: boolean;
+  errorMsg: string | null;
+}
 
-export default class RepoManagerView extends Component {
-  static propTypes = {};
+export default class RepoManagerView extends React.Component<any, RepoState> {
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     this.state = {
       repoName: "",
       success: false,
       errorMsg: null
-    }
+    };
   }
 
   render() {
-    let message;
+    let message: JSX.Element | null = null;
     if (this.state.success) {
       message = <Message
         success
         header='Created'
         content="Repo successfully created"
-      />
+      />;
     } else if (this.state.errorMsg) {
       message = <Message
         error
         header='Failure'
         content={this.state.errorMsg}
-      />
+      />;
     }
     return (
       <div>
@@ -41,7 +45,7 @@ export default class RepoManagerView extends Component {
   }
 
   _createRepo = () => {
-    axios.post("api/repo", {name: this.state.repoName}).then(
+    Axios.post("api/repo", {name: this.state.repoName}).then(
       res => {
         if (res.status === 200) {
           this.setState({success: true, errorMsg: null});
@@ -63,8 +67,8 @@ export default class RepoManagerView extends Component {
     )
   };
 
-  _onChange = (e, {value}) => {
-    this.setState({repoName: value})
+  _onChange = (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => {
+    this.setState({repoName: data.value});
   };
 
 }
