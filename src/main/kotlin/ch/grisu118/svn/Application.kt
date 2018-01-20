@@ -1,5 +1,6 @@
 package ch.grisu118.svn
 
+import ch.grisu118.svn.RepoManager.repoManager
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
@@ -61,6 +62,10 @@ fun Application.svnAdminApplication() {
 
   val authConfig = svnAdminConfig.config("auth")
   val passwdFile = File(authConfig.property("passwdFile").getString())
+  val admins = authConfig.property("admin").getList()
+
+  val repoConfig = svnAdminConfig.config("repo")
+  val repoLocation = File(repoConfig.property("location").getString())
 
   install(Sessions) {
     cookie<SvnAdminSession>("SvnAdminSession") {
@@ -70,7 +75,7 @@ fun Application.svnAdminApplication() {
 
   install(Routing) {
     login(Passwd(passwdFile))
-    repoManager()
+    repoManager(repoLocation, admins)
     static {
       resources("static")
       resources("react")

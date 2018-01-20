@@ -10,40 +10,56 @@ import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.sessions.get
 import io.ktor.sessions.sessions
+import mu.KotlinLogging
 import java.io.File
 import java.io.IOException
 
-// TODO config
-val repoRoot = File("/srv/svn")
+object RepoManager {
+  private val logger = KotlinLogging.logger { }
 
-internal fun Route.repoManager() {
-  post<Repo> {
-    val session = call.sessions.get<SvnAdminSession>()
-    if (session == null) {
-      call.respond(HttpStatusCode.Unauthorized.description("Not logged in"))
-    } else {
-      val (name) = call.receive<RepoData>()
-      if (name.isBlank()) {
-      call.respondText("Name cannot be empty", status = HttpStatusCode.BadRequest)
-        return@post
-    }
-      val newRepo = File(repoRoot, name)
-    try {
-      newRepo.canonicalPath
-    } catch (e: IOException) {
-      e.printStackTrace()
-      call.respondText("Invalid Repo Name", status = HttpStatusCode.BadRequest)
-      return@post
-    }
-    if (newRepo.exists()) {
-      call.respondText("Repo already exists", status = HttpStatusCode.BadRequest)
-      return@post
-    }
-    newRepo.mkdir()
-    "svnadmin create ${newRepo.absolutePath}".execute()
-    "chown -R www-data:subversion ${newRepo.absolutePath}".execute()
-    "chmod -R g+rws ${newRepo.absolutePath}".execute()
-    call.respond(HttpStatusCode.OK)
+  fun Route.repoManager(repoRoot: File, admins: List<String>) {
+    post<Repo> {
+      val session = call.sessions.get<SvnAdminSession>()
+      if (session == null) {
+        call.respond(HttpStatusCode.Unauthorized.description("Not logged in"))
+      } else if (!admins.contains(session.userId)) {
+        call.respond(HttpStatusCode.Forbidden.description("Not an admin"))
+      } else {
+        val (name) = call.receive<RepoData>()
+        if (name.isBlank()) {
+          call.respondText("Name cannot be empty", status = HttpStatusCode.BadRequest)
+          return@post
+        }
+        if (!name.matches(Regex("\\w"))) {
+          call.respondText("Only [a-zA-Z0-9_] are allowed", status = HttpStatusCode.BadRequest)
+          return@post
+        }
+        val newRepo = File(repoRoot, name)
+        try {
+          newRepo.canonicalPath
+        } catch (e: IOException) {
+          call.respondText("Invalid Repo Name", status = HttpStatusCode.BadRequest)
+          return@post
+        }
+        if (newRepo.exists()) {
+          call.respondText("Repo already exists", status = HttpStatusCode.BadRequest)
+          return@post
+        }
+        if (newRepo.mkdir()) {
+          val createCode = "svnadmin create ${newRepo.absolutePath}".execute()
+          val chownCode = "chown -R www-data:subversion ${newRepo.absolutePath}".execute()
+          val chmodCode = "chmod -R g+rws ${newRepo.absolutePath}".execute()
+          logger.info { "CreateCode: $createCode, chownCode: $chownCode, chmodCode: $chmodCode" }
+          if (createCode != 0 || chownCode != 0 || chmodCode != 0) {
+            newRepo.deleteRecursively()
+            call.respondText("Could not create SVN Repo", status = HttpStatusCode.InternalServerError)
+          } else {
+            call.respond(HttpStatusCode.OK)
+          }
+        } else {
+          call.respondText("Could not create Folder", status = HttpStatusCode.InternalServerError)
+        }
+      }
     }
   }
 }

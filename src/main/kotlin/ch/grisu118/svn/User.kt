@@ -16,10 +16,7 @@ import io.ktor.sessions.clear
 import io.ktor.sessions.get
 import io.ktor.sessions.sessions
 import io.ktor.sessions.set
-import java.io.File
 import java.util.*
-
-private val passwdFile = File("/etc/subversion/passwd")
 
 fun Route.login(passwd: Passwd) {
   location<Login> {
@@ -55,11 +52,15 @@ fun Route.login(passwd: Passwd) {
       call.respondText("invalid token", status = HttpStatusCode.Forbidden)
       return@post
     }
-    if (pass.isNullOrBlank() || userName.isNullOrBlank()) {
+    if (pass.isBlank() || userName.isBlank()) {
       call.respondText("values could not be empty!", status = HttpStatusCode.BadRequest)
       return@post
     }
-    if (pass == null || pass.length < 6) {
+    if (!userName.matches(Regex("\\w"))) {
+      call.respondText("UserName contains not allowed characters. [a-zA-Z0-9_]", status = HttpStatusCode.BadRequest)
+      return@post
+    }
+    if (pass.length < 6) {
       call.respondText("Passwords to short", status = HttpStatusCode.BadRequest)
       return@post
     }

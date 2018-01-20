@@ -1,0 +1,22 @@
+ktor {
+  deployment {
+    port = 8080
+  }
+  application {
+    modules = [ ch.grisu118.svn.ApplicationKt.svnAdminApplication ]
+  }
+}
+svnAdmin {
+  session {
+    cookie {
+      key = abcd
+    }
+  }
+  auth {
+    passwdFile = "/path/to/passwd"
+    admin = [ Name1, Name2 ]
+  }
+  repo {
+    location = "/path/to/repo/root"
+  }
+}
