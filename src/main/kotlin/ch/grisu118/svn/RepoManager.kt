@@ -30,7 +30,7 @@ object RepoManager {
           call.respondText("Name cannot be empty", status = HttpStatusCode.BadRequest)
           return@post
         }
-        if (!name.matches(Regex("\\w"))) {
+        if (!name.matches(Regex("\\w+"))) {
           call.respondText("Only [a-zA-Z0-9_] are allowed", status = HttpStatusCode.BadRequest)
           return@post
         }

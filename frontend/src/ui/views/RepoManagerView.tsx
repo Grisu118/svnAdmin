@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Header, Input, InputOnChangeData, Message} from "semantic-ui-react";
+import { Header, Input, InputOnChangeData, Message } from "semantic-ui-react";
 import Axios from 'axios';
 
 interface RepoState {
@@ -58,6 +58,8 @@ export default class RepoManagerView extends React.Component<any, RepoState> {
         if (error.response.status === 401) {
           this.setState({success: false, errorMsg: "Please login!"});
         } else if (error.response.status === 400) {
+          this.setState({success: false, errorMsg: error.response.data});
+        } else if (error.response.data && typeof error.response.data === "string") {
           this.setState({success: false, errorMsg: error.response.data});
         } else {
           this.setState({success: false, errorMsg: "Unknown Failure"});

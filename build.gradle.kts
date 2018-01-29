@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "ch.grisu118"
-version = "0.1.1"
+version = "0.1.2"
 
 plugins {
-  kotlin("jvm") version "1.2.20"
+  kotlin("jvm") version "1.2.21"
 }
 
 repositories {
@@ -18,9 +18,9 @@ repositories {
 val ktorVersion = "0.9.1-alpha-8"
 
 dependencies {
-  compile(kotlin("stdlib-jdk8", version = "1.2.20"))
-  compile(kotlin("stdlib-jre8", version = "1.2.20"))
-  compile(kotlin("reflect", version = "1.2.20"))
+  compile(kotlin("stdlib-jdk8", version = "1.2.21"))
+  compile(kotlin("stdlib-jre8", version = "1.2.21"))
+  compile(kotlin("reflect", version = "1.2.21"))
 
   compile("ch.grisu118:kotlin-wrapper:0.6.0")
 
@@ -75,4 +75,9 @@ tasks.withType<KotlinCompile> {
   kotlinOptions.jvmTarget = "1.8"
   dependsOn(versionNumberJson)
   dependsOn(copyFrontend)
+}
+
+val createRelease = task("createRelease") {
+  group = "build"
+  dependsOn(fatJar)
 }
