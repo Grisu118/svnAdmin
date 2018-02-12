@@ -1,7 +1,11 @@
 package ch.grisu118.svn
 
 import io.ktor.application.call
-import io.ktor.auth.*
+import io.ktor.auth.FormAuthChallenge
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.authentication
+import io.ktor.auth.formAuthentication
+import io.ktor.auth.principal
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.locations.location
@@ -56,7 +60,7 @@ fun Route.login(passwd: Passwd) {
       call.respondText("values could not be empty!", status = HttpStatusCode.BadRequest)
       return@post
     }
-    if (!userName.matches(Regex("\\w"))) {
+    if (!userName.matches(Regex("\\w+"))) {
       call.respondText("UserName contains not allowed characters. [a-zA-Z0-9_]", status = HttpStatusCode.BadRequest)
       return@post
     }

@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.Coroutines
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "ch.grisu118"
-version = "0.1.2"
+version = "0.1.3"
 
 plugins {
   kotlin("jvm") version "1.2.21"
